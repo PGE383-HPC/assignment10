@@ -1,0 +1,65 @@
+on: 
+  push:
+    branches: [master]
+jobs:
+  test:
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '1.10'
+        os:
+          - ubuntu-latest
+        arch:
+          - x64
+    steps:
+      - name: "Get assignment name"
+        shell: bash -l {0}
+        run: |
+          echo "ASSIGNMENT=$(echo $GITHUB_REPOSITORY | cut -d/ -f2 | cut -d- -f1)" >> $GITHUB_ENV;
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      - name: "Fetch Tests"
+        shell: bash -l {0}
+        run: |
+          cd test
+          curl \
+          --header 'Authorization: token ${{secrets.PGE383_SECRET_TOKEN}}' \
+          --header 'Accept: application/vnd.github.v3.raw' \
+          -O --location "https://api.github.com/repos/PGE383-HPC/${ASSIGNMENT}-solution/contents/test/runtests.jl"
+      - name: "Fetch Environment"
+        shell: bash -l {0}
+        run: |
+          curl \
+          --header 'Authorization: token ${{secrets.PGE383_SECRET_TOKEN}}' \
+          --header 'Accept: application/vnd.github.v3.raw' \
+          -O --location "https://api.github.com/repos/PGE383-HPC/${ASSIGNMENT}-solution/contents/Project.toml" \
+          -O --location "https://api.github.com/repos/PGE383-HPC/${ASSIGNMENT}-solution/contents/Manifest.toml"
+      - name: "Build and Test"
+        uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
+      - uses: julia-actions/cache@v1
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
+      - name: "Fetch .tex file"
+        shell: bash -l {0}
+        run: |
+          curl \
+          --header 'Authorization: token ${{secrets.PGE383_SECRET_TOKEN}}' \
+          --header 'Accept: application/vnd.github.v3.raw' \
+          -O --location "https://api.github.com/repos/PGE383-HPC/${ASSIGNMENT}-solution/contents/${ASSIGNMENT}.tex"
+      - name: "Run LaTeX"
+        shell: bash -l {0}
+        run: |
+          sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-latex-recommended texlive-pictures latexmk
+          julia --project=. -e "using assignment10; using Plots; pgfplotsx(); save_tikz()"
+          latexmk ${ASSIGNMENT}.tex
+          git config user.name 'John T. Foster'
+          git config user.email 'john.foster@utexas.edu'
+          git add ${ASSIGNMENT}.pdf
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
