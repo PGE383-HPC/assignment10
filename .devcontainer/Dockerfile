@@ -12,13 +12,13 @@ RUN conda install mamba -c conda-forge -y; \
     rm -rf /tmp/conda-tmp
 
 COPY Project.toml Manifest.toml .
-RUN chown vscode Project.toml Manifest.toml 
-
 USER vscode
 
 # Install Julia and Julia kernel
 RUN curl -fsSL https://install.julialang.org | sh -s -- -y;
 RUN /home/vscode/.juliaup/bin/julia -e "using Pkg; Pkg.add(\"IJulia\"); Pkg.add(\"LanguageServer\"); Pkg.add(\"Revise\"); Pkg.activate(\".\"); Pkg.instantiate()"; \ 
-    mkdir -p $HOME/.julia/config && echo "using Revise;" >> $HOME/.julia/config/startup.jl; \
-    rm Project.toml Manifest.toml
+    mkdir -p $HOME/.julia/config && echo "using Revise;" >> $HOME/.julia/config/startup.jl
+
+USER root
+RUN rm Project.toml Manifest.toml
 
