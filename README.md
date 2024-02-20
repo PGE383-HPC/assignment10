@@ -38,7 +38,7 @@ To see if you answers are correct, run the following command at the Terminal
 command line from the repository's root directory
 
 ```bash
-julia --project=. -e "using Pkg; Pkg.test()"
+julia --project -e "using Pkg; Pkg.test()"
 ```
 
 the tests will run and report if passing or failing.
