@@ -55,7 +55,7 @@ jobs:
       - name: "Run LaTeX"
         shell: bash -l {0}
         run: |
-          sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-latex-recommended texlive-pictures latexmk
+          sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-latex-recommended texlive-pictures latexmk texlive-xetex
           julia --project=. -e "using assignment10; using Plots; pgfplotsx(); save_tikz()"
           latexmk ${ASSIGNMENT}.tex
           git config user.name 'John T. Foster'
