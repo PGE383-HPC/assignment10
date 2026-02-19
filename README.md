@@ -1,6 +1,6 @@
 # Assignment 10
 
-![Assignment 10](https://github.com/PGE383-HPC/assignment10-solution/actions/workflows/main.yml/badge.svg)
+![Assignment 10](https://github.com/PGE383-HPC/assignment10/actions/workflows/main.yml/badge.svg)
 
 The file [assignment10.jl](src/assignment10.jl) has a function `z(Ppr, Tpr)` that will return the $z$ expansion
 factor for a gas.  Your assignment is to use that function to create the
